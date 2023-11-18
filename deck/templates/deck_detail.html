@@ -23,20 +23,20 @@
             </div>
           </div>
         {% endfor %}
-        <div class="sticky-bottom bg-light">
-          <div class="text-center">
-            <div class="flex">
-              <button name="e" class="btn btn-success">Easy</button>
-              <button name="m" class="btn btn-warning">Medium</button>
-              <button name="h" class="btn btn-danger">Hard</button>
-            </div>
-          </div>
-        </div>
       {% else %}
         <p>
           No cards for this deck: <strong>{{ deck.name }}</strong>
         </p>
       {% endif %}
+      <div class="sticky-bottom bg-light">
+        <div class="text-center">
+          <div class="flex">
+            <button name="e" class="btn-action btn btn-success">Easy</button>
+            <button name="m" class="btn-action btn btn-warning">Medium</button>
+            <button name="h" class="btn-action btn btn-danger">Hard</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <script>
@@ -45,6 +45,18 @@
     const playIcon = `<i class="bi bi-play-fill"></i>`
     const pauseIcon = `<i class="bi bi-pause-fill"></i>`
     const cardFlip = document.querySelectorAll('.flip-card')
+    const btnActions = document.querySelectorAll('.btn-action')
+    async function onNextReviewed(name) {
+      const deckId = {{deck.id}}
+      const response = await fetch(`/next_reviewed/${deckId}/${name}`)
+      const messages = await response.json()
+      window.location.href='/decks'
+    }
+    btnActions.forEach((el) => {
+      el.addEventListener('click', function (e) {
+        onNextReviewed(e.target.name)
+      })
+    })
     cardFlip.forEach((el) => {
       el.addEventListener('click', function () {
         if (el.classList.contains('flip')) {

@@ -1,7 +1,9 @@
-from django.http import FileResponse
+import datetime
+from django.utils import timezone
+from django.http import FileResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView, DetailView
-from .models import Deck, Card
+from .models import Deck, Card, Progress
 
 
 def index(request):
@@ -19,8 +21,20 @@ class DeckListView(ListView):
     context_object_name = 'decks'
     template_name = 'deck_list.html'
 
-    def get_queryset(self):
-        return Deck.objects.all()
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Assuming today is the current date
+        today = timezone.now().date()
+        # Get the decks with Progress.next_reviewed equal to today
+        decks_with_today_review = Deck.objects.filter(
+            progress__next_reviewed__date__lte=today)
+        decks_with_future_review = Deck.objects.filter(
+            progress__next_reviewed__date__gt=today)
+        context = {
+            'today': decks_with_today_review,
+            'nextday': decks_with_future_review
+        }
+        return context
 
 
 def deckDetail(request, id):
@@ -33,7 +47,15 @@ def deckDetail(request, id):
     return render(request, 'deck_detail.html', context)
 
 
-def play_audio(request, card_id):
+def play_audio(_, card_id):
     card = get_object_or_404(Card, pk=card_id)
     audio_file = card.audio.path
     return FileResponse(open(audio_file, 'rb'), content_type='audio/mpeg')
+
+
+def next_reviewed(request, deck_id, status):
+    deck = get_object_or_404(Deck, pk=deck_id)
+    progress = get_object_or_404(Progress, deck=deck)
+    progress.status = status
+    progress.save()
+    return JsonResponse({'message': 'update successful'})

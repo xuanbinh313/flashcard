@@ -1,12 +1,12 @@
-from django.db import models
-from django.contrib.auth.models import User
-from django.contrib.auth import get_user_model
-from django.dispatch import receiver
-from django.utils import timezone
-from django.urls import reverse
-from gtts import gTTS
-from googletrans import Translator
 import os
+from datetime import timedelta
+
+from django.contrib.auth.models import User
+from django.db import models
+from django.urls import reverse
+from django.utils import timezone
+from googletrans import Translator
+from gtts import gTTS
 
 
 class Deck(models.Model):
@@ -30,7 +30,7 @@ class Card(models.Model):
         return reverse('model-card-view', args=[str(self.id)])
 
     def save(self, *args, **kwargs):
-        should_have = not self.id 
+        should_have = not self.id
         if should_have:
             super().save(*args, **kwargs)
         # save audio
@@ -71,6 +71,16 @@ class Progress(models.Model):
 
     class Meta:
         ordering = ['next_reviewed']
+
+    def save(self,*args, **kwargs):
+        if self.id:
+            if self.status == 'e':
+                self.next_reviewed = self.next_reviewed + timedelta(7)
+            elif self.status == 'm':
+                self.next_reviewed = self.next_reviewed + timedelta(3)
+            else:
+                self.next_reviewed = self.next_reviewed + timedelta(1)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.id} - {self.deck.name}"
