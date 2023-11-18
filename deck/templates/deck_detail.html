@@ -1,0 +1,75 @@
+{% extends 'base_generic.html' %}
+{% block title %}
+  All Card For {{ deck.name }}
+{% endblock %}
+{% block content %}
+  <div>
+    <h1 class="fw-bold mb-5">{{ deck.name }}</h1>
+    <div class="vstack gap-2">
+      {% if cards %}
+        {% for card in cards %}
+          <div class="flip-card">
+            <div class="flip-card-inner rounded-2">
+              <div class="flip-card-front bg-warning-subtle d-flex align-items-center justify-content-between rounded-2 px-3">
+                <p class="m-0">{{ forloop.counter }}. {{ card.front_content }}</p>
+                <button class="play-audio btn btn-outline-dark"><i class="bi bi-play-fill"></i></button>
+                <audio class="audio-player" controls style="display: none;">
+                  <source src="{% url 'play_audio' card.id %}" type="audio/mpeg" />Your browser does not support the audio element.
+                </audio>
+              </div>
+              <div class="flip-card-back bg-success-subtle d-flex align-items-center rounded-2 px-3">
+                <p class="px-3 m-0">{{ card.back_content }}</p>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+        <div class="sticky-bottom bg-light">
+          <div class="text-center">
+            <div class="flex">
+              <button name="e" class="btn btn-success">Easy</button>
+              <button name="m" class="btn btn-warning">Medium</button>
+              <button name="h" class="btn btn-danger">Hard</button>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <p>
+          No cards for this deck: <strong>{{ deck.name }}</strong>
+        </p>
+      {% endif %}
+    </div>
+  </div>
+  <script>
+    // Get references to the button and audio player
+    const playButtons = document.querySelectorAll('.play-audio')
+    const playIcon = `<i class="bi bi-play-fill"></i>`
+    const pauseIcon = `<i class="bi bi-pause-fill"></i>`
+    const cardFlip = document.querySelectorAll('.flip-card')
+    cardFlip.forEach((el) => {
+      el.addEventListener('click', function () {
+        if (el.classList.contains('flip')) {
+          el.classList.remove('flip')
+        } else {
+          el.classList.add('flip')
+        }
+      })
+    })
+    playButtons.forEach((element) => {
+      element.addEventListener('click', function (e) {
+        e.stopPropagation()
+        if (element.nextElementSibling.paused) {
+          element.nextElementSibling.play()
+          // Change the button icon to pause (you can customize this part)
+          element.innerHTML = pauseIcon
+        } else {
+          element.nextElementSibling.pause()
+          // Change the button icon to play (you can customize this part)
+          element.innerHTML = playIcon
+        }
+        element.nextElementSibling.addEventListener('ended', function () {
+          element.innerHTML = playIcon
+        })
+      })
+    })
+  </script>
+{% endblock %}
