@@ -9,7 +9,7 @@
     {% for deck in today %}
       <li class="list-group-item">
         <div class="d-flex justify-content-between align-items-center">
-          <a class="fw-bold" href="/decks/{{ deck.id }}">{{ deck.name }}</a>
+          <a class="fw-bold" href="{% url "deck_detail" deck.id %}">{{ deck.name }}</a>
         </div>
       </li>
     {% endfor %}
@@ -19,7 +19,7 @@
     {% for deck in nextday %}
       <li class="list-group-item">
         <div class="d-flex justify-content-between align-items-center">
-          <a class="fw-bold" href="/decks/{{ deck.id }}">{{ deck.name }}</a>
+          <a class="fw-bold" href="{% url "deck_detail" deck.id %}">{{ deck.name }}</a>
         </div>
       </li>
     {% endfor %}
