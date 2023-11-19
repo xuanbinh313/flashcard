@@ -31,9 +31,9 @@
       <div class="sticky-bottom bg-light">
         <div class="text-center">
           <div class="flex">
-            <button name="e" class="btn-action btn btn-success">Easy</button>
-            <button name="m" class="btn-action btn btn-warning">Medium</button>
-            <button name="h" class="btn-action btn btn-danger">Hard</button>
+            <button name="e" class="btn-action btn btn-success" data-deck-list-url="{% url 'deck_list' %}" data-id="{{ deck.id }}">Easy</button>
+            <button name="m" class="btn-action btn btn-warning" data-deck-list-url="{% url 'deck_list' %}" data-id="{{ deck.id }}">Medium</button>
+            <button name="h" class="btn-action btn btn-danger" data-deck-list-url="{% url 'deck_list' %}" data-id="{{ deck.id }}">Hard</button>
           </div>
         </div>
       </div>
@@ -46,15 +46,16 @@
     const pauseIcon = `<i class="bi bi-pause-fill"></i>`
     const cardFlip = document.querySelectorAll('.flip-card')
     const btnActions = document.querySelectorAll('.btn-action')
-    async function onNextReviewed(name) {
-      const deckId = {{deck.id}}
-      const response = await fetch(`/next_reviewed/${deckId}/${name}`)
+    async function onNextReviewed(name, id, url) {
+      const response = await fetch(`/next_reviewed/${id}/${name}`)
       const messages = await response.json()
-      window.location.href={% url "deck_list" %}
+      window.location.href = url
     }
     btnActions.forEach((el) => {
       el.addEventListener('click', function (e) {
-        onNextReviewed(e.target.name)
+        const deckListUrl = el.dataset.deckListUrl
+        const id = el.dataset.id
+        onNextReviewed(e.target.name, id, deckListUrl)
       })
     })
     cardFlip.forEach((el) => {
