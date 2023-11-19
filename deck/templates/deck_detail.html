@@ -13,8 +13,8 @@
               <div class="flip-card-front bg-warning-subtle d-flex align-items-center justify-content-between rounded-2 px-3">
                 <p class="m-0">{{ forloop.counter }}. {{ card.front_content }}</p>
                 <button class="play-audio btn btn-outline-dark"><i class="bi bi-play-fill"></i></button>
-                <audio class="audio-player" controls style="display: none;">
-                  <source src="{% url 'play_audio' card.id %}" type="audio/mpeg" />Your browser does not support the audio element.
+                <audio data-src="{% url 'play_audio' card.id %}" class="audio-player" controls style="display: none;">
+                  <source src="" type="audio/mpeg" />Your browser does not support the audio element.
                 </audio>
               </div>
               <div class="flip-card-back bg-success-subtle d-flex align-items-center rounded-2 px-3">
@@ -31,9 +31,9 @@
       <div class="sticky-bottom bg-light">
         <div class="text-center">
           <div class="flex">
-            <button name="e" class="btn-action btn btn-success" data-deck-list-url="{% url 'deck_list' %}" data-id="{{ deck.id }}">Easy</button>
-            <button name="m" class="btn-action btn btn-warning" data-deck-list-url="{% url 'deck_list' %}" data-id="{{ deck.id }}">Medium</button>
-            <button name="h" class="btn-action btn btn-danger" data-deck-list-url="{% url 'deck_list' %}" data-id="{{ deck.id }}">Hard</button>
+            <button name="e" class="btn-action btn btn-success" data-url="{% url 'next_reviewed' deck.id 'e' %}">Easy</button>
+            <button name="m" class="btn-action btn btn-warning" data-url="{% url 'next_reviewed' deck.id 'm' %}">Medium</button>
+            <button name="h" class="btn-action btn btn-danger" data-url="{% url 'next_reviewed' deck.id 'h' %}">Hard</button>
           </div>
         </div>
       </div>
@@ -46,16 +46,15 @@
     const pauseIcon = `<i class="bi bi-pause-fill"></i>`
     const cardFlip = document.querySelectorAll('.flip-card')
     const btnActions = document.querySelectorAll('.btn-action')
-    async function onNextReviewed(name, id, url) {
-      const response = await fetch(`/next_reviewed/${id}/${name}`)
+    async function onNextReviewed(url) {
+      const response = await fetch(url)
       const messages = await response.json()
-      window.location.href = url
+      window.location.href = "{% url 'deck_list' %}"
     }
     btnActions.forEach((el) => {
       el.addEventListener('click', function (e) {
-        const deckListUrl = el.dataset.deckListUrl
-        const id = el.dataset.id
-        onNextReviewed(e.target.name, id, deckListUrl)
+        const nextUrl = el.dataset.url
+        onNextReviewed(nextUrl)
       })
     })
     cardFlip.forEach((el) => {
@@ -70,6 +69,10 @@
     playButtons.forEach((element) => {
       element.addEventListener('click', function (e) {
         e.stopPropagation()
+        if (!element.nextElementSibling.src) {
+          const dataSrc = element.nextElementSibling.dataset.src
+          element.nextElementSibling.src = dataSrc
+        }
         if (element.nextElementSibling.paused) {
           element.nextElementSibling.play()
           // Change the button icon to pause (you can customize this part)
